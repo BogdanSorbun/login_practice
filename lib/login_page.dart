@@ -1,100 +1,160 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/signuppage.dart';
-import 'package:flutter_app/homepage.dart';
+import 'package:flutter/services.dart';
+//import 'package:flutter_flat_app/theme/style.dart';
+//import 'style.dart';
+import 'package:flutter_app/inputField.dart';
+import 'package:flutter_app/textButton.dart';
+import 'package:flutter_app/roundedButton.dart';
+import 'package:flutter_app/validation.dart';
+import 'package:flutter_app/authentication.dart';
 
-// remember logins, checkboxes, filters all change the pages dynamically
-class LoginPage extends StatefulWidget {
-  static String tag = 'login-page';
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({Key key}) : super(key: key);
+
   @override
-  _LoginPageState createState() => new _LoginPageState();
+  LoginScreenState createState() => new LoginScreenState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class LoginScreenState extends State<LoginScreen> {
+  BuildContext context;
+  final GlobalKey<FormState> formKey = new GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  ScrollController scrollController = new ScrollController();
+  UserData user = new UserData();
+  UserAuth userAuth = new UserAuth();
+  bool autovalidate = false;
+  Validations validations = new Validations();
+
+  _onPressed() {
+    print("button clicked");
+  }
+
+  onPressed(String routeName) {
+    Navigator.of(context).pushNamed(routeName);
+  }
+
+  void showInSnackBar(String value) {
+    _scaffoldKey.currentState
+        .showSnackBar(new SnackBar(content: new Text(value)));
+  }
+
+  void _handleSubmitted() {
+    final FormState form = formKey.currentState;
+    if (!form.validate()) {
+      autovalidate = true; // Start validating on every change.
+      showInSnackBar('Please fix the errors in red before submitting.');
+    } else {
+      form.save();
+      userAuth.verifyUser(user).then((onValue) {
+        if (onValue == "Login Successfull")
+          Navigator.pushNamed(context, "/HomePage");
+        else
+          showInSnackBar(onValue);
+      }).catchError((PlatformException onError) {
+        showInSnackBar(onError.message);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final logo = Hero(
-      tag: 'hero',
-      child: CircleAvatar(
-        backgroundColor: Colors.transparent,
-        radius: 48.0,
-        child: Image.asset('assets/logo.png'),
-      ),
-    );
-
-    final email = TextFormField(
-      keyboardType: TextInputType.emailAddress,
-      autofocus: false,
-      initialValue: 'alucard@gmail.com',
-      decoration: InputDecoration(
-        hintText: 'Email',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
-      ),
-    );
-
-    final password = TextFormField(
-      autofocus: false,
-      initialValue: 'some password',
-      obscureText: true,
-      decoration: InputDecoration(
-        hintText: 'Password',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
-      ),
-    );
-
-    final loginButton = Padding(
-      padding: EdgeInsets.symmetric(vertical: 16.0),
-      child: RaisedButton(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
-        onPressed: () {
-          Navigator.of(context).pushNamed(HomePage.tag);
-        },
-        padding: EdgeInsets.all(12),
-        color: Colors.lightBlueAccent,
-        child: Text('Log In', style: TextStyle(color: Colors.white)),
-      ),
-    );
-
-    final forgotLabel = FlatButton(
-      child: Text(
-        'Forgot password?',
-        style: TextStyle(color: Colors.black54),
-      ),
-      onPressed: () {},
-    );
-
-//    lets create a simple signup page at least to get started here
-    final signupLabel = FlatButton(
-      child: Text(
-        'Not signed up yet?',
-        style: TextStyle(color: Colors.black54),
-      ),
-      onPressed: () {
-        Navigator.of(context).pushNamed(SignupPage.tag);
-      },
-    );
-
-    return Scaffold(
-      backgroundColor: Colors.deepPurple[900],
-      body: Center(
-        child: ListView(
-          shrinkWrap: true,
-          padding: EdgeInsets.only(left: 24.0, right: 24.0),
-          children: <Widget>[
-            logo,
-            SizedBox(height: 48.0),
-            email,
-            SizedBox(height: 8.0),
-            password,
-            SizedBox(height: 24.0),
-            loginButton,
-            forgotLabel
-          ],
-        ),
-      ),
-    );
+    this.context = context;
+    final Size screenSize = MediaQuery.of(context).size;
+    //print(context.widget.toString());
+    Validations validations = new Validations();
+    return new Scaffold(
+        key: _scaffoldKey,
+        body: new SingleChildScrollView(
+            controller: scrollController,
+            child: new Container(
+              padding: new EdgeInsets.all(16.0),
+//              decoration: new BoxDecoration(image: backgroundImage),
+              child: new Column(
+                children: <Widget>[
+                  new Container(
+                    height: screenSize.height / 2,
+                    child: new Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        new Center(
+                            child: new Image(
+//                              image: logo,
+                              width: (screenSize.width < 500)
+                                  ? 120.0
+                                  : (screenSize.width / 4) + 12.0,
+                              height: screenSize.height / 4 + 20,
+                            ))
+                      ],
+                    ),
+                  ),
+                  new Container(
+                    height: screenSize.height / 2,
+                    child: new Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        new Form(
+                          key: formKey,
+                          autovalidate: autovalidate,
+                          child: new Column(
+                            children: <Widget>[
+                              new InputField(
+                                  hintText: "Email",
+                                  obscureText: false,
+                                  textInputType: TextInputType.text,
+//                                  textStyle: textStyle,
+//                                  textFieldColor: textFieldColor,
+                                  icon: Icons.mail_outline,
+                                  iconColor: Colors.white,
+                                  bottomMargin: 20.0,
+                                  validateFunction: validations.validateEmail,
+                                  onSaved: (String email) {
+                                    user.email = email;
+                                  }),
+                              new InputField(
+                                  hintText: "Password",
+                                  obscureText: true,
+                                  textInputType: TextInputType.text,
+//                                  textStyle: textStyle,
+//                                  textFieldColor: textFieldColor,
+                                  icon: Icons.lock_open,
+                                  iconColor: Colors.white,
+                                  bottomMargin: 30.0,
+                                  validateFunction:
+                                  validations.validatePassword,
+                                  onSaved: (String password) {
+                                    user.password = password;
+                                  }),
+                              new RoundedButton(
+                                buttonName: "Get Started",
+                                onTap: _handleSubmitted,
+                                width: screenSize.width,
+                                height: 50.0,
+                                bottomMargin: 10.0,
+                                borderWidth: 0.0,
+//                                buttonColor: primaryColor,
+                              ),
+                            ],
+                          ),
+                        ),
+                        new Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            new TextButton(
+                                buttonName: "Create Account",
+                                onPressed: () => onPressed("/SignUp"),
+                        ),
+                            new TextButton(
+                                buttonName: "Need Help?",
+                                onPressed: _onPressed,)
+                          ],
+                        )
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            )));
   }
 }

@@ -1,121 +1,149 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/login_page.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_app/inputField.dart';
+import 'package:flutter_app/textButton.dart';
+import 'package:flutter_app/roundedButton.dart';
+import 'package:flutter_app/validation.dart';
+import 'package:flutter_app/authentication.dart';
+//import 'package:flutter_app/style.dart';
 
-//this page is going to be a stateful widget.  Don't forget that there is going
-//be non static things going on here
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({Key key}) : super(key: key);
 
-class SignupPage extends StatefulWidget {
-  static String tag = 'signup-page';
   @override
-//  createState  creates a state object.  In this code below createstate returns
-//  an instance of singuppagestate
-  _SignupPageState createState() => new _SignupPageState();
+  SignUpScreenState createState() => new SignUpScreenState();
 }
 
-//remember stateful widgets needs a reference for the state it is working with
-class _SignupPageState extends State<SignupPage> {
+class SignUpScreenState extends State<SignUpScreen> {
+  final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  UserData newUser = new UserData();
+  UserAuth userAuth = new UserAuth();
+  bool _autovalidate = false;
+  Validations _validations = new Validations();
+
+  _onPressed() {
+    print("button clicked");
+  }
+
+  void showInSnackBar(String value) {
+    _scaffoldKey.currentState
+        .showSnackBar(new SnackBar(content: new Text(value)));
+  }
+
+  void _handleSubmitted() {
+    final FormState form = _formKey.currentState;
+    if (!form.validate()) {
+      _autovalidate = true; // Start validating on every change.
+      showInSnackBar('Please fix the errors in red before submitting.');
+    } else {
+      form.save();
+      userAuth.createUser(newUser).then((onValue) {
+        showInSnackBar(onValue);
+      }).catchError((PlatformException onError) {
+        showInSnackBar(onError.message);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final logo = Hero(
-      tag: 'hero',
-      child: CircleAvatar(
-        backgroundColor: Colors.transparent,
-        radius: 48.0,
-        child: Image.asset('assets/logo.png'),
-      ),
-    );
-
-
-    final email = TextFormField(
-      keyboardType: TextInputType.emailAddress,
-      autofocus: false,
-      decoration: InputDecoration(
-        hintText: 'Email',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
-      ),
-    );
-
-    final emailConfirmation = TextFormField(
-      keyboardType: TextInputType.emailAddress,
-      autofocus: false,
-      decoration: InputDecoration(
-        hintText: 'Confirm Email',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
-      ),
-    );
-
-    final username = TextFormField(
-      keyboardType: TextInputType.text,
-      autofocus: false,
-      decoration: InputDecoration(
-        hintText: 'Username',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
-      ),
-    );
-
-    final password = TextFormField(
-      autofocus: false,
-      initialValue: 'some password',
-      obscureText: true,
-      decoration: InputDecoration(
-        hintText: 'Password',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
-      ),
-    );
-
-    final passwordConfirmation = TextFormField(
-      autofocus: false,
-      initialValue: 'some password',
-      obscureText: true,
-      decoration: InputDecoration(
-        hintText: 'Password',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
-      ),
-    );
-
-    final loginButton = Padding(
-      padding: EdgeInsets.symmetric(vertical: 16.0),
-      child: RaisedButton(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
-        onPressed: () {
-          Navigator.of(context).pushNamed(LoginPage.tag);
-        },
-        padding: EdgeInsets.all(12),
-        color: Colors.lightBlueAccent,
-        child: Text('Log In', style: TextStyle(color: Colors.white)),
-      ),
-    );
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: ListView(
-          shrinkWrap: true,
-          padding: EdgeInsets.only(left: 24.0, right: 24.0),
-          children: <Widget>[
-            logo,
-            SizedBox(height: 48.0),
-            email,
-            SizedBox(height: 8.0),
-            emailConfirmation,
-            SizedBox(height: 8.0),
-            username,
-            SizedBox(height: 8.0),
-            password,
-            SizedBox(height: 8.0),
-            passwordConfirmation,
-            SizedBox(height: 24.0),
-            loginButton,
-          ],
-        ),
-      ),
-    );
+    // TODO: implement build
+    Size screenSize = MediaQuery.of(context).size;
+    //print(context.widget.toString());
+    return new Scaffold(
+        key: _scaffoldKey,
+        body: new SingleChildScrollView(
+          child: new Container(
+            padding: new EdgeInsets.all(16.0),
+//            decoration: new BoxDecoration(image: backgroundImage),
+            child: new Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                new SizedBox(
+                    height: screenSize.height / 2,
+                    child: new Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        new Text(
+                          "CREATE ACCOUNT",
+                          textAlign: TextAlign.center,
+//                          style: headingStyle,
+                        )
+                      ],
+                    )),
+                new SizedBox(
+                  height: screenSize.height / 2,
+                  child: new Column(
+                    children: <Widget>[
+                      new Form(
+                          key: _formKey,
+                          autovalidate: _autovalidate,
+                          //onWillPop: _warnUserAboutInvalidData,
+                          child: new Column(
+                            children: <Widget>[
+                              new InputField(
+                                hintText: "Username",
+                                obscureText: false,
+                                textInputType: TextInputType.text,
+//                                textStyle: textStyle,
+//                                textFieldColor: textFieldColor,
+                                icon: Icons.person_outline,
+                                iconColor: Colors.white,
+                                bottomMargin: 20.0,
+                                validateFunction: _validations.validateName,
+                                onSaved: (String name) {
+                                  newUser.displayName = name;
+                                },
+                              ),
+                              new InputField(
+                                  hintText: "Email",
+                                  obscureText: false,
+                                  textInputType: TextInputType.emailAddress,
+//                                  textStyle: textStyle,
+//                                  textFieldColor: textFieldColor,
+                                  icon: Icons.mail_outline,
+                                  iconColor: Colors.white,
+                                  bottomMargin: 20.0,
+                                  validateFunction: _validations.validateEmail,
+                                  onSaved: (String email) {
+                                    newUser.email = email;
+                                  }),
+                              new InputField(
+                                  hintText: "Password",
+                                  obscureText: true,
+                                  textInputType: TextInputType.text,
+//                                  textStyle: textStyle,
+//                                  textFieldColor: textFieldColor,
+                                  icon: Icons.lock_open,
+                                  iconColor: Colors.white,
+                                  bottomMargin: 40.0,
+                                  validateFunction:
+                                  _validations.validatePassword,
+                                  onSaved: (String password) {
+                                    newUser.password = password;
+                                  }),
+                              new RoundedButton(
+                                  buttonName: "Continue",
+                                  onTap: _handleSubmitted,
+                                  width: screenSize.width,
+                                  height: 50.0,
+                                  bottomMargin: 10.0,
+                                  borderWidth: 1.0)
+                            ],
+                          )),
+                      new TextButton(
+                        buttonName: "Terms & Condition",
+                        onPressed: _onPressed,
+//                        buttonTextStyle: buttonTextStyle,
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        ));
   }
 }
